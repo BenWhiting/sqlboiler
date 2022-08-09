@@ -130,9 +130,7 @@ func ({{$ltable.DownSingular}}L) Load{{$relAlias.Local}}({{if $.NoContext}}e boi
 	}
 	{{- end}}
 
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results in eager load on {{.ForeignTable}}")
-	}
+	results.Close()
 	if err = results.Err(); err != nil {
 		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for {{.ForeignTable}}")
 	}

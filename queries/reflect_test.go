@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/volatiletech/sqlboiler/v4/drivers"
+	"github.com/pashagolub/pgxmock"
 	"github.com/volatiletech/null/v8"
-
-	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
 func bin64(i uint64) string {
@@ -54,15 +54,16 @@ func TestBindStruct(t *testing.T) {
 		dialect: &drivers.Dialect{LQ: '"', RQ: '"', UseIndexPlaceholders: true},
 	}
 
-	db, mock, err := sqlmock.New()
+	mock, err := pgxmock.NewConn()
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	ret := sqlmock.NewRows([]string{"id", "test"})
-	ret.AddRow(driver.Value(int64(35)), driver.Value("pat"))
-	ret.AddRow(driver.Value(int64(65)), driver.Value("hat"))
+	ret := pgxmock.NewRows([]string{"id", "test"})
+	ret.AddRow(driver.Value(35), driver.Value("pat"))
+	ret.AddRow(driver.Value(65), driver.Value("hat"))
 	mock.ExpectQuery(`SELECT \* FROM "fun";`).WillReturnRows(ret)
+	db := boil.NewPgxWrapper(mock)
 
 	err = query.Bind(nil, db, &testResults)
 	if err != nil {
@@ -94,14 +95,15 @@ func TestBindSlice(t *testing.T) {
 		dialect: &drivers.Dialect{LQ: '"', RQ: '"', UseIndexPlaceholders: true},
 	}
 
-	db, mock, err := sqlmock.New()
+	mock, err := pgxmock.NewConn()
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
+	db := boil.NewPgxWrapper(mock)
 
-	ret := sqlmock.NewRows([]string{"id", "test"})
-	ret.AddRow(driver.Value(int64(35)), driver.Value("pat"))
-	ret.AddRow(driver.Value(int64(12)), driver.Value("cat"))
+	ret := pgxmock.NewRows([]string{"id", "test"})
+	ret.AddRow(driver.Value(35), driver.Value("pat"))
+	ret.AddRow(driver.Value(12), driver.Value("cat"))
 	mock.ExpectQuery(`SELECT \* FROM "fun";`).WillReturnRows(ret)
 
 	err = query.Bind(nil, db, &testResults)
@@ -144,14 +146,15 @@ func TestBindPtrSlice(t *testing.T) {
 		dialect: &drivers.Dialect{LQ: '"', RQ: '"', UseIndexPlaceholders: true},
 	}
 
-	db, mock, err := sqlmock.New()
+	mock, err := pgxmock.NewConn()
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
+	db := boil.NewPgxWrapper(mock)
 
-	ret := sqlmock.NewRows([]string{"id", "test"})
-	ret.AddRow(driver.Value(int64(35)), driver.Value("pat"))
-	ret.AddRow(driver.Value(int64(12)), driver.Value("cat"))
+	ret := pgxmock.NewRows([]string{"id", "test"})
+	ret.AddRow(driver.Value(35), driver.Value("pat"))
+	ret.AddRow(driver.Value(12), driver.Value("cat"))
 	mock.ExpectQuery(`SELECT \* FROM "fun";`).WillReturnRows(ret)
 
 	err = query.Bind(context.Background(), db, &testResults)
@@ -452,13 +455,14 @@ func TestBindSingular(t *testing.T) {
 		dialect: &drivers.Dialect{LQ: '"', RQ: '"', UseIndexPlaceholders: true},
 	}
 
-	db, mock, err := sqlmock.New()
+	mock, err := pgxmock.NewConn()
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
+	db := boil.NewPgxWrapper(mock)
 
-	ret := sqlmock.NewRows([]string{"id", "test"})
-	ret.AddRow(driver.Value(int64(35)), driver.Value("pat"))
+	ret := pgxmock.NewRows([]string{"id", "test"})
+	ret.AddRow(driver.Value(35), driver.Value("pat"))
 	mock.ExpectQuery(`SELECT \* FROM "fun";`).WillReturnRows(ret)
 
 	err = query.Bind(nil, db, &testResults)
@@ -496,14 +500,15 @@ func TestBind_InnerJoin(t *testing.T) {
 		dialect: &drivers.Dialect{LQ: '"', RQ: '"', UseIndexPlaceholders: true},
 	}
 
-	db, mock, err := sqlmock.New()
+	mock, err := pgxmock.NewConn()
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
+	db := boil.NewPgxWrapper(mock)
 
-	ret := sqlmock.NewRows([]string{"id"})
-	ret.AddRow(driver.Value(int64(10)))
-	ret.AddRow(driver.Value(int64(11)))
+	ret := pgxmock.NewRows([]string{"id"})
+	ret.AddRow(driver.Value(10))
+	ret.AddRow(driver.Value(11))
 	mock.ExpectQuery(`SELECT "fun"\.\* FROM "fun" INNER JOIN happy as h on fun.id = h.fun_id;`).WillReturnRows(ret)
 
 	err = query.Bind(nil, db, &testResults)
@@ -552,14 +557,15 @@ func TestBind_InnerJoinSelect(t *testing.T) {
 		joins:      []join{{kind: JoinInner, clause: "happy as h on fun.happy_id = h.id"}},
 	}
 
-	db, mock, err := sqlmock.New()
+	mock, err := pgxmock.NewConn()
 	if err != nil {
-		t.Error(err)
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
+	db := boil.NewPgxWrapper(mock)
 
-	ret := sqlmock.NewRows([]string{"fun.id", "h.id"})
-	ret.AddRow(driver.Value(int64(10)), driver.Value(int64(11)))
-	ret.AddRow(driver.Value(int64(12)), driver.Value(int64(13)))
+	ret := pgxmock.NewRows([]string{"fun.id", "h.id"})
+	ret.AddRow(driver.Value(10), driver.Value(11))
+	ret.AddRow(driver.Value(12), driver.Value(13))
 	mock.ExpectQuery(`SELECT "fun"."id" as "fun.id", "h"."id" as "h.id" FROM "fun" INNER JOIN happy as h on fun.happy_id = h.id;`).WillReturnRows(ret)
 
 	err = query.Bind(nil, db, &testResults)

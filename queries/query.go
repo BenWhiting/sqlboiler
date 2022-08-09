@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/jackc/pgx/v4"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
@@ -125,7 +126,7 @@ func (q *Query) Exec(exec boil.Executor) (sql.Result, error) {
 }
 
 // QueryRow executes the query for the One finisher and returns a row
-func (q *Query) QueryRow(exec boil.Executor) *sql.Row {
+func (q *Query) QueryRow(exec boil.Executor) pgx.Row {
 	qs, args := BuildQuery(q)
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, qs)
@@ -135,7 +136,7 @@ func (q *Query) QueryRow(exec boil.Executor) *sql.Row {
 }
 
 // Query executes the query for the All finisher and returns multiple rows
-func (q *Query) Query(exec boil.Executor) (*sql.Rows, error) {
+func (q *Query) Query(exec boil.Executor) (pgx.Rows, error) {
 	qs, args := BuildQuery(q)
 	if boil.DebugMode {
 		fmt.Fprintln(boil.DebugWriter, qs)
@@ -156,7 +157,7 @@ func (q *Query) ExecContext(ctx context.Context, exec boil.ContextExecutor) (sql
 }
 
 // QueryRowContext executes the query for the One finisher and returns a row
-func (q *Query) QueryRowContext(ctx context.Context, exec boil.ContextExecutor) *sql.Row {
+func (q *Query) QueryRowContext(ctx context.Context, exec boil.ContextExecutor) pgx.Row {
 	qs, args := BuildQuery(q)
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -167,7 +168,7 @@ func (q *Query) QueryRowContext(ctx context.Context, exec boil.ContextExecutor) 
 }
 
 // QueryContext executes the query for the All finisher and returns multiple rows
-func (q *Query) QueryContext(ctx context.Context, exec boil.ContextExecutor) (*sql.Rows, error) {
+func (q *Query) QueryContext(ctx context.Context, exec boil.ContextExecutor) (pgx.Rows, error) {
 	qs, args := BuildQuery(q)
 	if boil.IsDebug(ctx) {
 		writer := boil.DebugWriterFrom(ctx)
@@ -190,7 +191,7 @@ func (q *Query) ExecP(exec boil.Executor) sql.Result {
 
 // QueryP executes the query for the All finisher and returns multiple rows
 // It will panic on error
-func (q *Query) QueryP(exec boil.Executor) *sql.Rows {
+func (q *Query) QueryP(exec boil.Executor) pgx.Rows {
 	rows, err := q.Query(exec)
 	if err != nil {
 		panic(boil.WrapErr(err))

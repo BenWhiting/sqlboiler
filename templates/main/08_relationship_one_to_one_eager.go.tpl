@@ -93,9 +93,7 @@ func ({{$ltable.DownSingular}}L) Load{{$relAlias.Local}}({{if $.NoContext}}e boi
 		return errors.Wrap(err, "failed to bind eager loaded slice {{$ftable.UpSingular}}")
 	}
 
-	if err = results.Close(); err != nil {
-		return errors.Wrap(err, "failed to close results of eager load for {{.ForeignTable}}")
-	}
+	results.Close()
 	if err = results.Err(); err != nil {
 		return errors.Wrap(err, "error occurred during iteration of eager loaded relations for {{.ForeignTable}}")
 	}

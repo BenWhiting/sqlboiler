@@ -14,6 +14,7 @@ import (
 	"unicode"
 
 	"github.com/friendsofgo/errors"
+	"github.com/jackc/pgx/v4"
 	"github.com/volatiletech/sqlboiler/v4/boil"
 	"github.com/volatiletech/strmangle"
 )
@@ -107,7 +108,7 @@ func (q *Query) BindG(ctx context.Context, obj interface{}) error {
 //
 // For custom objects that want to use eager loading, please see the
 // loadRelationships function.
-func Bind(rows *sql.Rows, obj interface{}) error {
+func Bind(rows pgx.Rows, obj interface{}) error {
 	structType, sliceType, singular, err := bindChecks(obj)
 	if err != nil {
 		return err
@@ -131,7 +132,7 @@ func (q *Query) Bind(ctx context.Context, exec boil.Executor, obj interface{}) e
 		return err
 	}
 
-	var rows *sql.Rows
+	var rows pgx.Rows
 	if ctx != nil {
 		rows, err = q.QueryContext(ctx, exec.(boil.ContextExecutor))
 	} else {
@@ -141,15 +142,10 @@ func (q *Query) Bind(ctx context.Context, exec boil.Executor, obj interface{}) e
 		return errors.Wrap(err, "bind failed to execute query")
 	}
 	if err = bind(rows, obj, structType, sliceType, bkind); err != nil {
-		if innerErr := rows.Close(); innerErr != nil {
-			return errors.Wrapf(err, "error on rows.Close after bind error: %+v", innerErr)
-		}
-
+		rows.Close()
 		return err
 	}
-	if err = rows.Close(); err != nil {
-		return errors.Wrap(err, "failed to clean up rows in bind")
-	}
+	rows.Close()
 	if err = rows.Err(); err != nil {
 		return errors.Wrap(err, "error from rows in bind")
 	}
@@ -216,10 +212,11 @@ func bindChecks(obj interface{}) (structType reflect.Type, sliceType reflect.Typ
 	}
 }
 
-func bind(rows *sql.Rows, obj interface{}, structType, sliceType reflect.Type, bkind bindKind) error {
-	cols, err := rows.Columns()
-	if err != nil {
-		return errors.Wrap(err, "bind failed to get column names")
+func bind(rows pgx.Rows, obj interface{}, structType, sliceType reflect.Type, bkind bindKind) error {
+	colNames := []string{}
+	colTags := rows.FieldDescriptions()
+	for _, colName := range colTags {
+		colNames = append(colNames, string(colName.Name))
 	}
 
 	var ptrSlice reflect.Value
@@ -228,7 +225,7 @@ func bind(rows *sql.Rows, obj interface{}, structType, sliceType reflect.Type, b
 		ptrSlice = reflect.Indirect(reflect.ValueOf(obj))
 	}
 
-	mapping, err := getMappingCache(structType).mapping(cols)
+	mapping, err := getMappingCache(structType).mapping(colNames)
 	if err != nil {
 		return err
 	}
