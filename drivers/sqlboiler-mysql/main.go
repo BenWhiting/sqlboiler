@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/volatiletech/sqlboiler/v4/drivers"
-	"github.com/volatiletech/sqlboiler/v4/drivers/sqlboiler-mysql/driver"
+	"github.com/BenWhiting/sqlboiler/v4/drivers"
+	"github.com/BenWhiting/sqlboiler/v4/drivers/sqlboiler-mysql/driver"
 )
 
 func main() {

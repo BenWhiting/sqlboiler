@@ -18,8 +18,8 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/BenWhiting/sqlboiler/v4/drivers"
 	"github.com/stretchr/testify/require"
-	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
 var (

@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/BenWhiting/sqlboiler/v4/boil"
+	"github.com/BenWhiting/sqlboiler/v4/drivers"
 	"github.com/jackc/pgx/v4"
-	"github.com/volatiletech/sqlboiler/v4/boil"
-	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
 // joinKind is the type of join
