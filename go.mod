@@ -3,7 +3,6 @@ module github.com/BenWhiting/sqlboiler/v4
 go 1.16
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/Masterminds/sprig/v3 v3.2.2
 	github.com/davecgh/go-spew v1.1.1
 	github.com/ericlagergren/decimal v0.0.0-20181231230500-73749d4874d5

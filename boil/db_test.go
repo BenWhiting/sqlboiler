@@ -13,7 +13,7 @@ func TestGetSetDB(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 
-	SetDB(&PgxWrapper{tx: mock})
+	SetDB(&BoilerPgxWrap{mock})
 
 	if GetDB() == nil {
 		t.Errorf("Expected GetDB to return a database handle, got nil")

@@ -31,6 +31,19 @@ type Transactor interface {
 	Executor
 }
 
+type result struct {
+	index int64
+	rows  int64
+}
+
+func (r result) LastInsertId() (int64, error) {
+	return r.index, nil
+}
+
+func (r result) RowsAffected() (int64, error) {
+	return r.rows, nil
+}
+
 // Tx is an interface that describes a transaction.
 type Tx interface {
 	// Commit commits the transaction.
@@ -41,7 +54,7 @@ type Tx interface {
 
 // Beginner begins transactions.
 type Beginner interface {
-	Begin() (*PgxWrapper, error)
+	Begin() (*BoilerPgxWrap, error)
 }
 
 // Begin a transaction with the current global database handle.
@@ -77,59 +90,50 @@ func BeginTx(ctx context.Context, opts *sql.TxOptions) (*sql.Tx, error) {
 	return creator.BeginTx(ctx, opts)
 }
 
-type Result struct {
-	index int64
-	rows  int64
+type BoilerPgxWrap struct {
+	pgx.Tx
 }
 
-func (r Result) LastInsertId() (int64, error) {
-	return r.index, nil
+func NewPgxWrapper(tx pgx.Tx) *BoilerPgxWrap {
+	return &BoilerPgxWrap{tx}
 }
 
-func (r Result) RowsAffected() (int64, error) {
-	return r.rows, nil
+func (w *BoilerPgxWrap) Commit() error {
+	return w.Tx.Commit(context.Background())
 }
 
-type PgxWrapper struct {
-	tx pgx.Tx
+func (w *BoilerPgxWrap) Rollback() error {
+	return w.Tx.Rollback(context.Background())
 }
 
-func NewPgxWrapper(tx pgx.Tx) *PgxWrapper {
-	return &PgxWrapper{tx: tx}
-}
-
-func (w *PgxWrapper) Commit() error {
-	return w.tx.Commit(context.Background())
-}
-
-func (w *PgxWrapper) Rollback() error {
-	return w.tx.Rollback(context.Background())
-}
-
-func (w *PgxWrapper) Exec(query string, args ...interface{}) (sql.Result, error) {
-	ct, err := w.tx.Exec(context.Background(), query, args...)
+func (w *BoilerPgxWrap) Exec(query string, args ...interface{}) (sql.Result, error) {
+	ct, err := w.Tx.Exec(context.Background(), query, args...)
 	if err != nil {
 		return nil, err
 	}
-	return Result{index: 0, rows: ct.RowsAffected()}, nil
+	return &result{rows: ct.RowsAffected(), index: 0}, nil
 }
 
-func (w *PgxWrapper) QueryRow(query string, args ...interface{}) pgx.Row {
-	return w.tx.QueryRow(context.Background(), query, args...)
+func (w *BoilerPgxWrap) Query(query string, args ...interface{}) (pgx.Rows, error) {
+	return w.Tx.Query(context.Background(), query, args...)
 }
 
-func (w *PgxWrapper) Query(query string, args ...interface{}) (pgx.Rows, error) {
-	return w.tx.Query(context.Background(), query, args...)
+func (w *BoilerPgxWrap) QueryRow(query string, args ...interface{}) pgx.Row {
+	return w.Tx.QueryRow(context.Background(), query, args...)
 }
 
-func (w *PgxWrapper) ExecContext(_ context.Context, query string, args ...interface{}) (sql.Result, error) {
-	return w.Exec(query, args...)
+func (w *BoilerPgxWrap) ExecContext(ctx context.Context, query string, args ...interface{}) (sql.Result, error) {
+	ct, err := w.Tx.Exec(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	return &result{rows: ct.RowsAffected(), index: 0}, nil
 }
 
-func (w *PgxWrapper) QueryContext(ctx context.Context, query string, args ...interface{}) (pgx.Rows, error) {
-	return w.tx.Query(ctx, query, args...)
+func (w *BoilerPgxWrap) QueryContext(ctx context.Context, query string, args ...interface{}) (pgx.Rows, error) {
+	return w.Tx.Query(ctx, query, args...)
 }
 
-func (w *PgxWrapper) QueryRowContext(ctx context.Context, query string, args ...interface{}) pgx.Row {
-	return w.tx.QueryRow(ctx, query, args...)
+func (w *BoilerPgxWrap) QueryRowContext(ctx context.Context, query string, args ...interface{}) pgx.Row {
+	return w.Tx.QueryRow(ctx, query, args...)
 }

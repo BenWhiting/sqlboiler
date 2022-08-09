@@ -163,7 +163,7 @@ func (l loadRelationshipState) callLoadFunction(depth int, loadingFrom reflect.V
 	// Hack to allow nil executors
 	execArg := reflect.ValueOf(l.exec)
 	if !execArg.IsValid() {
-		execArg = reflect.ValueOf((*boil.PgxWrapper)(nil))
+		execArg = reflect.ValueOf((*boil.BoilerPgxWrap)(nil))
 	}
 
 	// Get a loader instance from anything we have, *struct, or *[]*struct
