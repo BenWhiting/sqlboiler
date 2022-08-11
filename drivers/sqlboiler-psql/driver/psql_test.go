@@ -20,7 +20,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/BenWhiting/sqlboiler/v4/drivers"
+	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
 var (

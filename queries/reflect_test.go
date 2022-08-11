@@ -12,10 +12,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/BenWhiting/sqlboiler/v4/boil"
-	"github.com/BenWhiting/sqlboiler/v4/drivers"
 	"github.com/pashagolub/pgxmock"
 	"github.com/volatiletech/null/v8"
+	"github.com/volatiletech/sqlboiler/v4/boil"
+	"github.com/volatiletech/sqlboiler/v4/drivers"
 )
 
 func bin64(i uint64) string {

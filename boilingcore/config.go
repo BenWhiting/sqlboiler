@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/cast"
 
-	"github.com/BenWhiting/sqlboiler/v4/drivers"
-	"github.com/BenWhiting/sqlboiler/v4/importers"
+	"github.com/volatiletech/sqlboiler/v4/drivers"
+	"github.com/volatiletech/sqlboiler/v4/importers"
 )
 
 // Config for the running of the commands
