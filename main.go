@@ -74,7 +74,9 @@ func main() {
 		Use:   "sqlboiler [flags] <driver>",
 		Short: "SQL Boiler generates an ORM tailored to your database schema.",
 		Long: "SQL Boiler generates a Go ORM from template files, tailored to your database schema.\n" +
-			`Complete documentation is available at http://github.com/volatiletech/sqlboiler`,
+			"Complete documentation is available at http://github.com/volatiletech/sqlboiler./ \n" +
+			`NOTICE: THIS HAS BEEN MODIFIED TO WORK WITH PGX.`,
+
 		Example:       `sqlboiler psql`,
 		PreRunE:       preRun,
 		RunE:          run,
